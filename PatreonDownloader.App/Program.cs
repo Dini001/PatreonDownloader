@@ -127,7 +127,7 @@ namespace PatreonDownloader.App
             _universalDownloader.CrawlerMessage += UniversalDownloaderOnCrawlerMessage;
             _universalDownloader.FileDownloaded += UniversalDownloaderOnFileDownloaded;
 
-            PatreonDownloaderSettings settings = await InitializeSettings(commandLineOptions);
+            PatreonDownloaderSettings settings = InitializeSettings(commandLineOptions);
             await _universalDownloader.Download(commandLineOptions.Url, settings);
 
             _universalDownloader.StatusChanged -= UniversalDownloaderOnStatusChanged;
@@ -140,7 +140,7 @@ namespace PatreonDownloader.App
             _universalDownloader = null;
         }
 
-        private static async Task<PatreonDownloaderSettings> InitializeSettings(CommandLineOptions commandLineOptions)
+        private static PatreonDownloaderSettings InitializeSettings(CommandLineOptions commandLineOptions)
         {
             if (!string.IsNullOrWhiteSpace(commandLineOptions.ProxyServerAddress) &&
                 !Uri.TryCreate(commandLineOptions.ProxyServerAddress, UriKind.Absolute, out _))
@@ -166,7 +166,9 @@ namespace PatreonDownloader.App
                 MaxFilenameLength = commandLineOptions.MaxFilenameLength,
                 FallbackToContentTypeFilenames = commandLineOptions.FilenamesFallbackToContentType,
                 ProxyServerAddress = commandLineOptions.ProxyServerAddress,
-                IsUseLegacyFilenaming = commandLineOptions.IsUseLegacyFilenaming
+                IsUseLegacyFilenaming = commandLineOptions.IsUseLegacyFilenaming,
+                PublishedAfter = commandLineOptions.PublishedAfter,
+                PublishedBefore = commandLineOptions.PublishedBefore
             };
 
             if (settings.IsUseLegacyFilenaming && (settings.FileExistsAction == FileExistsAction.BackupIfDifferent || settings.FileExistsAction == FileExistsAction.ReplaceIfDifferent))
@@ -195,7 +197,7 @@ namespace PatreonDownloader.App
 
         private static void UniversalDownloaderOnNewCrawledUrl(object sender, NewCrawledUrlEventArgs e)
         {
-            _logger.Info($"  + {((PatreonCrawledUrl) e.CrawledUrl).UrlTypeAsFriendlyString}: {e.CrawledUrl.Url}");
+            _logger.Info($"   +{((PatreonCrawledUrl)e.CrawledUrl).UrlTypeAsFriendlyString}: {e.CrawledUrl.Url}");
         }
 
         private static void UniversalDownloaderOnPostCrawlEnd(object sender, PostCrawlEventArgs e)
